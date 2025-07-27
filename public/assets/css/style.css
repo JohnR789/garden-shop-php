@@ -1,0 +1,17 @@
+body {
+  background: #f6fff7;
+}
+.card-img-top {
+  object-fit: cover;
+  height: 220px;
+}
+.card {
+  border-radius: 18px;
+}
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.6rem;
+}
+footer {
+  border-top: 1px solid #e0e0e0;
+}
