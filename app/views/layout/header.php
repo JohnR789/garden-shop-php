@@ -8,9 +8,19 @@
     <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link href="/assets/css/style.css" rel="stylesheet">
+    <style>
+      #mainHeader {
+        transition: transform 0.3s;
+        z-index: 1030;
+        will-change: transform;
+      }
+      @media (max-width: 767px) {
+        #mainHeader { transform: translateY(0) !important; }
+      }
+    </style>
 </head>
 <body style="background: #f7faf7;">
-<nav class="navbar navbar-expand-lg navbar-dark bg-success sticky-top shadow-sm">
+<nav id="mainHeader" class="navbar navbar-expand-lg navbar-dark bg-success sticky-top shadow-sm">
     <div class="container">
         <a class="navbar-brand fw-bold" href="/" style="font-family: 'Inter', Arial, sans-serif; font-size:2rem;">🌱 Garden Tools Shop</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample07" aria-controls="navbarsExample07" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,5 +48,6 @@
     </div>
 </nav>
 <div class="container py-4">
+
 
 

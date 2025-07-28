@@ -1,5 +1,6 @@
 </div> <!-- .container -->
-<footer class="footer bg-success text-white py-3 mt-auto shadow-sm" style="position:sticky; bottom:0; width:100%; z-index:1030;">
+
+<footer class="footer bg-success text-white py-3 mt-auto shadow-sm" style="width:100%; z-index:1030;">
     <div class="container d-flex flex-wrap justify-content-between align-items-center">
         <span>&copy; <?= date('Y') ?> Garden Tools Shop</span>
         <nav>
@@ -10,6 +11,23 @@
         </nav>
     </div>
 </footer>
+
+<!-- Hide/reveal header script -->
+<script>
+let lastScrollY = window.scrollY;
+const header = document.getElementById('mainHeader');
+window.addEventListener('scroll', function () {
+  if (!header) return;
+  if (window.scrollY > lastScrollY && window.scrollY > 80) {
+    header.style.transform = 'translateY(-100%)';
+    header.style.transition = 'transform 0.3s';
+  } else {
+    header.style.transform = 'translateY(0)';
+    header.style.transition = 'transform 0.3s';
+  }
+  lastScrollY = window.scrollY;
+});
+</script>
+
 </body>
 </html>
-
