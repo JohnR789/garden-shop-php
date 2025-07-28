@@ -1,10 +1,10 @@
 # Use the official PHP image with Apache
 FROM php:8.2-apache
 
-# Install system dependencies and PHP extensions
+# Install system dependencies and PHP extensions for PostgreSQL
 RUN apt-get update && apt-get install -y \
-  libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libzip-dev unzip git \
-  && docker-php-ext-install pdo_mysql
+  libpq-dev git unzip \
+  && docker-php-ext-install pdo_pgsql
 
 # Enable Apache mod_rewrite (for pretty URLs if you use them)
 RUN a2enmod rewrite
@@ -15,7 +15,7 @@ COPY . /var/www/html
 # Set working directory
 WORKDIR /var/www/html
 
-# If you use Composer, install it and run install
+# Install Composer and run install if composer.json exists
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN if [ -f composer.json ]; then composer install --no-dev --optimize-autoloader; fi
 

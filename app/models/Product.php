@@ -50,7 +50,7 @@ class Product {
      */
     public static function search($query, $category_id = null, $sort = 'newest') {
         $pdo = self::pdo();
-        $sql = 'SELECT * FROM products WHERE deleted_at IS NULL AND (name LIKE ? OR description LIKE ?)';
+        $sql = 'SELECT * FROM products WHERE deleted_at IS NULL AND (name ILIKE ? OR description ILIKE ?)';
         $params = ['%' . $query . '%', '%' . $query . '%'];
 
         if ($category_id) {
@@ -79,11 +79,11 @@ class Product {
 
     /**
      * Pagination: returns ['data' => [...], 'total' => n]
-     * Uses LIMIT/OFFSET directly (MySQL-safe).
+     * Uses LIMIT/OFFSET directly (Postgres-safe).
      */
     public static function paginated($withDeleted = false, $category_id = null, $sort = 'newest', $search = '', $page = 1, $perPage = 9) {
         $pdo = self::pdo();
-        $sql = 'SELECT SQL_CALC_FOUND_ROWS * FROM products';
+        $sql = 'SELECT * FROM products';
         $params = [];
         $conditions = [];
         if (!$withDeleted) $conditions[] = 'deleted_at IS NULL';
@@ -92,13 +92,13 @@ class Product {
             $params[] = $category_id;
         }
         if ($search !== '') {
-            $conditions[] = '(name LIKE ? OR description LIKE ?)';
+            $conditions[] = '(name ILIKE ? OR description ILIKE ?)';
             $params[] = "%$search%";
             $params[] = "%$search%";
         }
         if ($conditions) $sql .= ' WHERE ' . implode(' AND ', $conditions);
         $sql .= ' ' . self::sortSql($sort);
-        // FIX: Use integer casting for LIMIT/OFFSET, not parameters (prevents SQL syntax error)
+        // Use integer casting for LIMIT/OFFSET, not parameters (prevents SQL syntax error)
         $offset = max(0, ((int)$page - 1) * (int)$perPage);
         $limit = (int)$perPage;
         $sql .= " LIMIT $limit OFFSET $offset";
@@ -108,7 +108,9 @@ class Product {
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Get total count
-        $total = $pdo->query("SELECT FOUND_ROWS()")->fetchColumn();
+        $totalStmt = $pdo->query("SELECT COUNT(*) FROM products" . 
+            ($conditions ? ' WHERE ' . implode(' AND ', $conditions) : ''));
+        $total = $totalStmt->fetchColumn();
 
         return [
             'data' => $data,
@@ -209,7 +211,7 @@ class Product {
     protected static function pdo() {
         $cfg = require __DIR__ . '/../../config/config.php';
         return new PDO(
-            "mysql:host={$cfg['db_host']};dbname={$cfg['db_name']};charset=utf8mb4",
+            "pgsql:host={$cfg['db_host']};dbname={$cfg['db_name']};port=" . ($cfg['db_port'] ?? 5432),
             $cfg['db_user'], $cfg['db_pass'],
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );

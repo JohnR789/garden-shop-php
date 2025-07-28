@@ -27,9 +27,10 @@ class User {
     protected static function pdo() {
         $cfg = require __DIR__ . '/../../config/config.php';
         return new PDO(
-            "mysql:host={$cfg['db_host']};dbname={$cfg['db_name']};charset=utf8mb4",
+            "pgsql:host={$cfg['db_host']};dbname={$cfg['db_name']};port=" . ($cfg['db_port'] ?? 5432),
             $cfg['db_user'], $cfg['db_pass'],
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
     }
 }
+

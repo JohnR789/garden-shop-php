@@ -10,4 +10,6 @@ return [
     'db_name' => $_ENV['DB_NAME'] ?? '',
     'db_user' => $_ENV['DB_USER'] ?? '',
     'db_pass' => $_ENV['DB_PASS'] ?? '',
+    'db_port' => $_ENV['DB_PORT'] ?? '5432',
+    'db_type' => $_ENV['DB_TYPE'] ?? 'pgsql'
 ];

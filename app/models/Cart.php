@@ -17,9 +17,9 @@ class Cart
         if ($cart) return $cart;
 
         // If not found, create one
-        $stmt = $pdo->prepare("INSERT INTO carts (user_id, status) VALUES (?, 'active')");
+        $stmt = $pdo->prepare("INSERT INTO carts (user_id, status) VALUES (?, 'active') RETURNING id");
         $stmt->execute([$user_id]);
-        $cart_id = $pdo->lastInsertId();
+        $cart_id = $stmt->fetchColumn();
 
         // Return the new cart
         return [
@@ -88,7 +88,7 @@ class Cart
     public static function countItems($cart_id)
     {
         $pdo = self::pdo();
-        $stmt = $pdo->prepare("SELECT SUM(quantity) FROM cart_items WHERE cart_id = ?");
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE cart_id = ?");
         $stmt->execute([$cart_id]);
         return (int) $stmt->fetchColumn();
     }
@@ -123,9 +123,10 @@ class Cart
     {
         $cfg = require __DIR__ . '/../../config/config.php';
         return new PDO(
-            "mysql:host={$cfg['db_host']};dbname={$cfg['db_name']};charset=utf8mb4",
+            "pgsql:host={$cfg['db_host']};dbname={$cfg['db_name']};port=" . ($cfg['db_port'] ?? 5432),
             $cfg['db_user'], $cfg['db_pass'],
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
     }
 }
+
