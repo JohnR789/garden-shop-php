@@ -31,9 +31,10 @@
                 <li class="nav-item">
                     <a class="nav-link position-relative" href="/cart">
                         Cart
-                        <?php if (!empty($_SESSION['cart'])): ?>
-                            <span class="badge bg-warning text-dark ms-1" style="font-size:0.9em;"><?= array_sum($_SESSION['cart']) ?></span>
-                        <?php endif; ?>
+                        <!-- Always render the badge for dynamic update via JS -->
+                        <span id="cart-badge" class="badge bg-warning text-dark ms-1" style="font-size:0.9em;">
+                            <?= array_sum($_SESSION['cart'] ?? []) ?>
+                        </span>
                     </a>
                 </li>
                 <?php if (!empty($_SESSION['user'])): ?>
@@ -48,6 +49,7 @@
     </div>
 </nav>
 <div class="container py-4">
+
 
 
 

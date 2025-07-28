@@ -90,4 +90,18 @@ body {
     padding: 1em .3em;
   }
 }
+/* Toast Notification */
+#toast-notification {
+  font-size: 1rem;
+  border-radius: .5rem;
+  box-shadow: 0 2px 1rem rgba(0,0,0,0.16);
+  opacity: 0.97;
+  pointer-events: auto;
+  min-width: 220px;
+  z-index: 20000;
+}
+#toast-notification .toast-body {
+  font-weight: 600;
+  letter-spacing: .02em;
+}
 

@@ -1,4 +1,3 @@
-<!-- Shopping cart overview -->
 <h1>Your Cart</h1>
 <?php if (empty($products)): ?>
     <div class="alert alert-info mt-4">
@@ -25,7 +24,7 @@
                 <td>
                     <form action="/cart/remove" method="post" style="display:inline">
                         <input type="hidden" name="id" value="<?= $item['id'] ?>">
-                        <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                        <button type="submit" class="btn btn-sm btn-danger remove-from-cart-btn">Remove</button>
                     </form>
                 </td>
             </tr>
@@ -42,3 +41,5 @@
     <a href="/" class="btn btn-outline-secondary">Continue Shopping</a>
     <a href="/checkout" class="btn btn-primary btn-lg mt-3">Proceed to Checkout</a>
 <?php endif; ?>
+
+

@@ -54,7 +54,8 @@
             </div>
             <div class="card-footer d-flex justify-content-between align-items-center bg-white border-0" style="position:relative;">
                 <a href="/product?id=<?= $product['id'] ?>" class="btn btn-outline-success btn-sm">View Details</a>
-                <form action="/cart/add" method="post" class="d-inline add-to-cart-float" style="position:absolute; right:1rem; bottom:1rem;">
+                <!-- AJAX Add to Cart -->
+                <form action="/cart/add" method="post" class="d-inline add-to-cart-form" style="position:absolute; right:1rem; bottom:1rem;" data-product-name="<?= htmlspecialchars($product['name']) ?>">
                     <input type="hidden" name="id" value="<?= $product['id'] ?>">
                     <button type="submit" class="btn btn-success btn-sm">Add to Cart</button>
                 </form>
@@ -95,7 +96,7 @@
 </nav>
 <?php endif; ?>
 
-<!-- Live Search Script -->
+<!-- Live Search Script & AJAX Cart Badge Update -->
 <script>
 const searchInput = document.getElementById('live-search');
 const resultsDiv = document.getElementById('search-results');
@@ -125,6 +126,34 @@ document.addEventListener('click', function(e) {
         resultsDiv.innerHTML = '';
     }
 });
-</script>
 
+// AJAX Add-to-cart for toast and cart badge update
+document.querySelectorAll('.add-to-cart-form').forEach(form => {
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const formData = new FormData(form);
+    fetch('/cart/add', {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      showToast(data.message || 'Added to cart!', data.success ? 'bg-success' : 'bg-danger');
+      // Update the cart badge if server responds with count
+      if (typeof data.cart_count !== 'undefined') {
+        const badge = document.getElementById('cart-badge');
+        if (badge) badge.textContent = data.cart_count;
+      } else {
+        // fallback: increment by one (may not be perfectly accurate with multi-item forms, but works for typical "add one" UX)
+        const badge = document.getElementById('cart-badge');
+        if (badge && data.success) badge.textContent = parseInt(badge.textContent || "0", 10) + 1;
+      }
+    })
+    .catch(() => {
+      showToast('Could not add to cart.', 'bg-danger');
+    });
+  });
+});
+</script>
 

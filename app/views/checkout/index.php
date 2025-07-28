@@ -1,4 +1,3 @@
-<!-- Checkout Form -->
 <h1>Checkout</h1>
 
 <?php if ($error): ?>
@@ -48,3 +47,4 @@
     <button class="btn btn-success btn-lg">Place Order</button>
 </form>
 <a href="/cart" class="btn btn-outline-secondary">Back to Cart</a>
+

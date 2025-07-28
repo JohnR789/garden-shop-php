@@ -15,7 +15,6 @@ class CartController {
         $cart = $_SESSION['cart'] ?? [];
         $products = [];
         $total = 0;
-        // For each cart item, fetch details and calc total
         foreach ($cart as $id => $qty) {
             $product = Product::find($id);
             if ($product) {
@@ -29,17 +28,47 @@ class CartController {
     }
 
     /**
-     * Add an item to the cart.
+     * Add an item to the cart (supports AJAX toast and returns new cart count).
      */
     public function add() {
         $id = $_POST['id'] ?? null;
-        if (!$id || !Product::find($id)) {
-            header("Location: /"); exit;
+        $product = $id ? Product::find($id) : null;
+        if (!$product) {
+            $cart_count = array_sum($_SESSION['cart'] ?? []);
+            if ($this->isAjax()) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Product not found.',
+                    'cart_count' => $cart_count
+                ]);
+                exit;
+            }
+            $_SESSION['toast'] = [
+                'message' => 'Product not found.',
+                'class' => 'bg-danger'
+            ];
+            header("Location: /");
+            exit;
         }
-        // If not set, initialize cart
         if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
         if (!isset($_SESSION['cart'][$id])) $_SESSION['cart'][$id] = 0;
         $_SESSION['cart'][$id] += 1;
+
+        $cart_count = array_sum($_SESSION['cart']);
+        if ($this->isAjax()) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'message' => "{$product['name']} added to cart!",
+                'cart_count' => $cart_count
+            ]);
+            exit;
+        }
+        $_SESSION['toast'] = [
+            'message' => "{$product['name']} added to cart!",
+            'class' => 'bg-success'
+        ];
         header("Location: /cart");
         exit;
     }
@@ -51,8 +80,26 @@ class CartController {
         $id = $_POST['id'] ?? null;
         if (isset($_SESSION['cart'][$id])) {
             unset($_SESSION['cart'][$id]);
+            $_SESSION['toast'] = [
+                'message' => 'Product removed from cart.',
+                'class' => 'bg-warning text-dark'
+            ];
+        } else {
+            $_SESSION['toast'] = [
+                'message' => 'Product not found in cart.',
+                'class' => 'bg-danger'
+            ];
         }
         header("Location: /cart");
         exit;
     }
+
+    private function isAjax() {
+        return (
+            isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+        );
+    }
 }
+
+

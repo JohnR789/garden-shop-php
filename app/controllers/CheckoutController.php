@@ -29,6 +29,10 @@ class CheckoutController {
 
         // If cart empty, redirect
         if (!$products) {
+            $_SESSION['toast'] = [
+                'message' => 'Your cart is empty!',
+                'class' => 'bg-warning text-dark'
+            ];
             header("Location: /cart");
             exit;
         }
@@ -41,29 +45,38 @@ class CheckoutController {
             $email = trim($_POST['email'] ?? '');
             $address = trim($_POST['address'] ?? '');
 
-            // Basic validation (expand as needed)
             if (!$name || !$email || !$address) {
+                $_SESSION['toast'] = [
+                    'message' => 'Please fill in all fields.',
+                    'class' => 'bg-danger'
+                ];
                 $error = "Please fill in all required fields.";
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['toast'] = [
+                    'message' => 'Invalid email address.',
+                    'class' => 'bg-danger'
+                ];
                 $error = "Invalid email address.";
             } else {
                 try {
-                    // Get user ID if logged in (null otherwise)
                     $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-                    // For debugging: log session data (remove or comment out in production!)
-                    // error_log("SESSION: " . print_r($_SESSION, true));
-                    
                     $orderId = Order::create(
                         ['name' => $name, 'email' => $email, 'address' => $address],
                         $products,
                         $total,
                         $user_id
                     );
-                    // Clear the cart
                     unset($_SESSION['cart']);
+                    $_SESSION['toast'] = [
+                        'message' => 'Order placed successfully!',
+                        'class' => 'bg-success'
+                    ];
                 } catch (\Exception $e) {
-                    // Show actual error for debugging (remove $e->getMessage() in production)
                     $error = "Order failed: " . $e->getMessage();
+                    $_SESSION['toast'] = [
+                        'message' => $error,
+                        'class' => 'bg-danger'
+                    ];
                 }
             }
         }
