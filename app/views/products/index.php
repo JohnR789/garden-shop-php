@@ -98,62 +98,74 @@
 
 <!-- Live Search Script & AJAX Cart Badge Update -->
 <script>
-const searchInput = document.getElementById('live-search');
-const resultsDiv = document.getElementById('search-results');
-searchInput.addEventListener('input', function() {
-    const query = this.value.trim();
-    if (query.length === 0) {
+(function() {
+  // --- Live Search Only If Search Bar Exists ---
+  const searchInput = document.getElementById('live-search');
+  const resultsDiv = document.getElementById('search-results');
+  if (searchInput && resultsDiv) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value.trim();
+      if (query.length === 0) {
         resultsDiv.innerHTML = '';
         return;
-    }
-    fetch('/api/search-products.php?q=' + encodeURIComponent(query))
+      }
+      fetch('/api/search-products.php?q=' + encodeURIComponent(query))
         .then(res => res.json())
         .then(products => {
-            if (!products.length) {
-                resultsDiv.innerHTML = '';
-                return;
-            }
-            resultsDiv.innerHTML = products.map(p => `
-                <a href="/product?id=${p.id}" class="list-group-item list-group-item-action d-flex align-items-center">
-                    <img src="${p.image}" width="36" height="36" class="me-2 rounded" alt="${p.name}">
-                    <span>${p.name} <span class="text-muted ms-2 small">$${Number(p.price).toFixed(2)}</span></span>
-                </a>
-            `).join('');
+          if (!products.length) {
+            resultsDiv.innerHTML = '';
+            return;
+          }
+          resultsDiv.innerHTML = products.map(p => `
+            <a href="/product?id=${p.id}" class="list-group-item list-group-item-action d-flex align-items-center">
+              <img src="${p.image}" width="36" height="36" class="me-2 rounded" alt="${p.name}">
+              <span>${p.name} <span class="text-muted ms-2 small">$${Number(p.price).toFixed(2)}</span></span>
+            </a>
+          `).join('');
         });
-});
-document.addEventListener('click', function(e) {
-    if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+    });
+    document.addEventListener('click', function(e) {
+      if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
         resultsDiv.innerHTML = '';
-    }
-});
-
-// AJAX Add-to-cart for toast and cart badge update
-document.querySelectorAll('.add-to-cart-form').forEach(form => {
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    const formData = new FormData(form);
-    fetch('/cart/add', {
-      method: 'POST',
-      body: formData,
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(resp => resp.json())
-    .then(data => {
-      showToast(data.message || 'Added to cart!', data.success ? 'bg-success' : 'bg-danger');
-      // Update the cart badge if server responds with count
-      if (typeof data.cart_count !== 'undefined') {
-        const badge = document.getElementById('cart-badge');
-        if (badge) badge.textContent = data.cart_count;
-      } else {
-        // fallback: increment by one (may not be perfectly accurate with multi-item forms, but works for typical "add one" UX)
-        const badge = document.getElementById('cart-badge');
-        if (badge && data.success) badge.textContent = parseInt(badge.textContent || "0", 10) + 1;
       }
-    })
-    .catch(() => {
-      showToast('Could not add to cart.', 'bg-danger');
+    });
+  }
+
+  // --- AJAX Add-to-cart for toast and badge update ---
+  document.querySelectorAll('.add-to-cart-form').forEach(form => {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      const formData = new FormData(form);
+      fetch('/cart/add', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        showToast(data.message || 'Added to cart!', data.success ? 'bg-success' : 'bg-danger');
+        // Update the cart badge if server responds with count
+        const badge = document.getElementById('cart-badge');
+        if (typeof data.cart_count !== 'undefined' && badge) {
+          badge.textContent = data.cart_count;
+          if (parseInt(data.cart_count) > 0) {
+            badge.classList.remove('bg-secondary');
+            badge.classList.add('bg-warning', 'text-dark');
+            badge.style.opacity = '1';
+          } else {
+            badge.classList.remove('bg-warning', 'text-dark');
+            badge.classList.add('bg-secondary');
+            badge.style.opacity = '0.4';
+          }
+        }
+      })
+      .catch(() => {
+        showToast('Could not add to cart.', 'bg-danger');
+      });
     });
   });
-});
+})();
 </script>
+
+
 

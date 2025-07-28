@@ -29,12 +29,27 @@
         <div class="collapse navbar-collapse" id="navbarsExample07">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link position-relative" href="/cart">
+                    <a class="nav-link position-relative" href="/cart" id="cart-link">
                         Cart
-                        <!-- Always render the badge for dynamic update via JS -->
-                        <span id="cart-badge" class="badge bg-warning text-dark ms-1" style="font-size:0.9em;">
-                            <?= array_sum($_SESSION['cart'] ?? []) ?>
-                        </span>
+                        <?php
+                            // Use DB cart count for logged-in, session cart for guests
+                            if (!empty($_SESSION['user_id'])) {
+                                if (!class_exists('\App\Models\Cart')) {
+                                    require_once __DIR__ . '/../../models/Cart.php';
+                                }
+                                $cartId = \App\Models\Cart::getActiveCartId($_SESSION['user_id']);
+                                $cart_count = $cartId ? \App\Models\Cart::countItems($cartId) : 0;
+                            } else {
+                                $cart_count = array_sum($_SESSION['cart'] ?? []);
+                            }
+                            $badgeClass = $cart_count > 0 ? 'bg-warning text-dark' : 'bg-secondary';
+                            $badgeStyle = 'font-size:0.9em;' . ($cart_count == 0 ? 'opacity:0.4;' : '');
+                        ?>
+                        <span
+                            id="cart-badge"
+                            class="badge ms-1 <?= $badgeClass ?>"
+                            style="<?= $badgeStyle ?>"
+                        ><?= $cart_count ?></span>
                     </a>
                 </li>
                 <?php if (!empty($_SESSION['user'])): ?>
@@ -49,6 +64,8 @@
     </div>
 </nav>
 <div class="container py-4">
+
+
 
 
 
