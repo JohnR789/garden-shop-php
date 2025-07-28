@@ -57,13 +57,16 @@ class AuthController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username'] ?? '');
             $password = $_POST['password'] ?? '';
-            $confirm = $_POST['confirm'] ?? '';
-            if (!$username || !$password) {
+            $confirm  = $_POST['confirm'] ?? '';
+            $email    = trim($_POST['email'] ?? '');
+            $name     = trim($_POST['name'] ?? '');
+
+            if (!$username || !$password || !$email || !$name) {
                 $_SESSION['toast'] = [
                     'message' => 'Please fill in all fields.',
                     'class' => 'bg-danger'
                 ];
-                $error = "Username and password required";
+                $error = "All fields are required";
             } elseif ($password !== $confirm) {
                 $_SESSION['toast'] = [
                     'message' => 'Passwords do not match.',
@@ -76,8 +79,14 @@ class AuthController {
                     'class' => 'bg-danger'
                 ];
                 $error = "Username already exists";
+            } elseif (User::findByEmail($email)) {
+                $_SESSION['toast'] = [
+                    'message' => 'Email already registered.',
+                    'class' => 'bg-danger'
+                ];
+                $error = "Email already registered";
             } else {
-                User::create($username, $password);
+                User::create($username, $password, $email, $name);
                 $_SESSION['toast'] = [
                     'message' => 'Registration successful! Please login.',
                     'class' => 'bg-success'
@@ -103,3 +112,4 @@ class AuthController {
         exit;
     }
 }
+

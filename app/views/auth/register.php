@@ -7,6 +7,14 @@
         <?php endif; ?>
         <form method="post" class="mt-4">
             <div class="mb-3">
+                <label>Full Name</label>
+                <input type="text" name="name" class="form-control" autocomplete="name" required>
+            </div>
+            <div class="mb-3">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" autocomplete="email" required>
+            </div>
+            <div class="mb-3">
                 <label>Username</label>
                 <input type="text" name="username" class="form-control" autocomplete="username" required>
             </div>
@@ -23,3 +31,4 @@
         </form>
     </div>
 </div>
+

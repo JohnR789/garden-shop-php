@@ -17,11 +17,19 @@ class User {
     /**
      * Register a new user.
      */
-    public static function create($username, $password) {
+    public static function create($username, $password, $email = null, $name = null) {
         $pdo = self::pdo();
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $pdo->prepare('INSERT INTO users (username, password) VALUES (?, ?)');
-        return $stmt->execute([$username, $hash]);
+
+        // Use sensible defaults if name/email not passed in
+        if ($email === null) $email = $username; // fallback: username is email
+        if ($name === null) $name = $username;   // fallback: username is name
+
+        // Specify all NOT NULL columns in INSERT
+        $stmt = $pdo->prepare(
+            'INSERT INTO users (name, email, password, is_admin, username) VALUES (?, ?, ?, false, ?)'
+        );
+        return $stmt->execute([$name, $email, $hash, $username]);
     }
 
     protected static function pdo() {
@@ -33,4 +41,5 @@ class User {
         );
     }
 }
+
 
