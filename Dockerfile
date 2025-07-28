@@ -19,6 +19,12 @@ WORKDIR /var/www/html
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN if [ -f composer.json ]; then composer install --no-dev --optimize-autoloader; fi
 
+# Set Apache DocumentRoot to /var/www/html/public
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf
+
+# Update <Directory> in apache2.conf to point to public directory (for .htaccess, etc)
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s|/var/www/html|/var/www/html/public|g' /etc/apache2/apache2.conf
+
 # Set appropriate permissions for web files
 RUN chown -R www-data:www-data /var/www/html
 
