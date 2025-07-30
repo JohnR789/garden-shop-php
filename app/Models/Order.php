@@ -12,22 +12,29 @@ class Order {
 
         try {
             // Insert order (user_id can be null for guest orders)
-            $stmt = $pdo->prepare('INSERT INTO orders (user_id, name, email, address, total) VALUES (?, ?, ?, ?, ?) RETURNING id');
+            $stmt = $pdo->prepare('
+                INSERT INTO orders (user_id, customer_name, customer_email, customer_address, total)
+                VALUES (?, ?, ?, ?, ?) RETURNING id
+            ');
             $stmt->execute([
                 $user_id,
-                $customer['name'],
-                $customer['email'],
-                $customer['address'],
+                $customer['name'] ?? '',
+                $customer['email'] ?? '',
+                $customer['address'] ?? '',
                 $total
             ]);
             $order_id = $stmt->fetchColumn();
 
-            // Insert each cart item into order_items
-            $itemStmt = $pdo->prepare('INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)');
+            // Insert each cart item into order_items (with product_name)
+            $itemStmt = $pdo->prepare('
+                INSERT INTO order_items (order_id, product_id, product_name, quantity, price)
+                VALUES (?, ?, ?, ?, ?)
+            ');
             foreach ($cart as $item) {
                 $itemStmt->execute([
                     $order_id,
-                    $item['id'],
+                    $item['id'],        
+                    $item['name'],   
                     $item['qty'],
                     $item['price']
                 ]);
@@ -50,3 +57,4 @@ class Order {
         );
     }
 }
+

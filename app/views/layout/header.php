@@ -53,6 +53,17 @@
                     </a>
                 </li>
                 <?php if (!empty($_SESSION['user'])): ?>
+                    <!-- Show Admin link if this user is an admin -->
+                    <?php
+                        // Cache is_admin in session for performance
+                        if (!isset($_SESSION['is_admin'])) {
+                            $user = \App\Models\User::findByUsername($_SESSION['user']);
+                            $_SESSION['is_admin'] = !empty($user['is_admin']);
+                        }
+                        if ($_SESSION['is_admin']) {
+                            echo '<li class="nav-item"><a class="nav-link fw-bold text-warning" href="/admin/products">Admin</a></li>';
+                        }
+                    ?>
                     <li class="nav-item"><a class="nav-link" href="#">Hi, <?= htmlspecialchars($_SESSION['user']) ?></a></li>
                     <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
                 <?php else: ?>
@@ -64,6 +75,8 @@
     </div>
 </nav>
 <div class="container py-4">
+
+
 
 
 

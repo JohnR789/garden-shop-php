@@ -107,10 +107,16 @@ class Product {
         $stmt->execute($params);
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Get total count
-        $totalStmt = $pdo->query("SELECT COUNT(*) FROM products" . 
-            ($conditions ? ' WHERE ' . implode(' AND ', $conditions) : ''));
-        $total = $totalStmt->fetchColumn();
+        // Corrected count query to use prepare/execute when there are conditions with params!
+        if ($conditions) {
+            $totalSql = 'SELECT COUNT(*) FROM products WHERE ' . implode(' AND ', $conditions);
+            $totalStmt = $pdo->prepare($totalSql);
+            $totalStmt->execute($params);
+            $total = $totalStmt->fetchColumn();
+        } else {
+            $totalStmt = $pdo->query("SELECT COUNT(*) FROM products");
+            $total = $totalStmt->fetchColumn();
+        }
 
         return [
             'data' => $data,
@@ -187,11 +193,11 @@ class Product {
     }
 
     /**
-     * Fetch all product categories.
+     * Fetch all product categories, ordered and deduplicated by name (case-insensitive).
      */
     public static function categories() {
         $pdo = self::pdo();
-        $stmt = $pdo->query('SELECT * FROM categories ORDER BY name');
+        $stmt = $pdo->query('SELECT DISTINCT ON (LOWER(name)) * FROM categories ORDER BY LOWER(name), id');
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -217,8 +223,6 @@ class Product {
         );
     }
 }
-
-
 
 
 

@@ -8,20 +8,25 @@ use App\Core\View;
 /**
  * Handles user login, logout, and registration.
  */
-class AuthController {
+class AuthController
+{
     /**
      * Login form and handler.
      */
-    public function login() {
+    public function login()
+    {
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $username = $_POST['username'] ?? '';
+            $input = trim($_POST['username'] ?? '');
             $password = $_POST['password'] ?? '';
-            $user = User::findByUsername($username);
+
+            // Allow login by username OR email
+            $user = User::findByUsernameOrEmail($input);
+
             if ($user && password_verify($password, $user['password'])) {
-                // Set session user & user_id
                 $_SESSION['user'] = $user['username'];
                 $_SESSION['user_id'] = $user['id'];
+                $_SESSION['is_admin'] = !empty($user['is_admin']); // <--- ADD THIS
 
                 // Merge session cart (if exists) into DB cart
                 if (!empty($_SESSION['cart'])) {
@@ -52,7 +57,8 @@ class AuthController {
     /**
      * User registration form and handler.
      */
-    public function register() {
+    public function register()
+    {
         $error = '';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username'] ?? '');
@@ -67,6 +73,12 @@ class AuthController {
                     'class' => 'bg-danger'
                 ];
                 $error = "All fields are required";
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['toast'] = [
+                    'message' => 'Invalid email address.',
+                    'class' => 'bg-danger'
+                ];
+                $error = "Invalid email address";
             } elseif ($password !== $confirm) {
                 $_SESSION['toast'] = [
                     'message' => 'Passwords do not match.',
@@ -101,9 +113,10 @@ class AuthController {
     /**
      * Log user out.
      */
-    public function logout() {
-        unset($_SESSION['user'], $_SESSION['user_id']);
-        unset($_SESSION['cart']); // Ensure no leftover guest cart on new login
+    public function logout()
+    {
+        unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['is_admin']); // <-- updated here
+        unset($_SESSION['cart']);
         $_SESSION['toast'] = [
             'message' => 'Logged out successfully.',
             'class' => 'bg-success'
@@ -112,4 +125,5 @@ class AuthController {
         exit;
     }
 }
+
 

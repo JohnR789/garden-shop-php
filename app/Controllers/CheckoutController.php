@@ -3,6 +3,7 @@ namespace App\Controllers;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Cart;
 use App\Core\View;
 
 /**
@@ -13,21 +14,41 @@ class CheckoutController {
      * Show checkout form or handle submission.
      */
     public function index() {
-        $cart = $_SESSION['cart'] ?? [];
         $products = [];
         $total = 0;
+        $error = '';
+        $orderId = null;
+        $name = '';
+        $email = '';
+        $address = '';
 
-        foreach ($cart as $id => $qty) {
-            $product = Product::find($id);
-            if ($product) {
-                $product['qty'] = $qty;
-                $product['subtotal'] = $qty * $product['price'];
-                $products[] = $product;
-                $total += $product['subtotal'];
+        // Get cart items: DB for logged-in, session for guest
+        if (!empty($_SESSION['user_id'])) {
+            // Logged in: fetch DB-backed cart
+            $cart = Cart::getOrCreateActiveCart($_SESSION['user_id']);
+            $items = Cart::getItems($cart['id']);
+            foreach ($items as $item) {
+                $item['qty'] = $item['quantity'];
+                $item['subtotal'] = $item['qty'] * $item['price'];
+                $item['id'] = $item['product_id']; // Standardize for Order model!
+                $products[] = $item;
+                $total += $item['subtotal'];
+            }
+        } else {
+            // Guest: fetch from session
+            $cart = $_SESSION['cart'] ?? [];
+            foreach ($cart as $id => $qty) {
+                $product = Product::find($id);
+                if ($product) {
+                    $product['qty'] = $qty;
+                    $product['subtotal'] = $qty * $product['price'];
+                    $products[] = $product;
+                    $total += $product['subtotal'];
+                }
             }
         }
 
-        // If cart empty, redirect
+        // If cart is empty, redirect back to cart page
         if (!$products) {
             $_SESSION['toast'] = [
                 'message' => 'Your cart is empty!',
@@ -37,9 +58,7 @@ class CheckoutController {
             exit;
         }
 
-        $error = '';
-        $orderId = null;
-
+        // Handle form submission
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
             $email = trim($_POST['email'] ?? '');
@@ -66,7 +85,16 @@ class CheckoutController {
                         $total,
                         $user_id
                     );
-                    unset($_SESSION['cart']);
+
+                    // After order: clear the correct cart
+                    if (!empty($_SESSION['user_id'])) {
+                        // DB: clear cart in DB for user
+                        Cart::clear($cart['id']);
+                    } else {
+                        // Guest: clear cart in session
+                        unset($_SESSION['cart']);
+                    }
+
                     $_SESSION['toast'] = [
                         'message' => 'Order placed successfully!',
                         'class' => 'bg-success'
@@ -94,3 +122,4 @@ class CheckoutController {
         }
     }
 }
+
