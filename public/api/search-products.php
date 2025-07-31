@@ -1,7 +1,7 @@
 <?php
 // public/api/search-products.php
 
-require_once dirname(__DIR__, 2) . '/app/models/Product.php';
+require_once dirname(__DIR__, 2) . '/app/Models/Product.php';
 use App\Models\Product;
 
 header('Content-Type: application/json');
