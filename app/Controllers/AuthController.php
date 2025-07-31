@@ -26,7 +26,7 @@ class AuthController
             if ($user && password_verify($password, $user['password'])) {
                 $_SESSION['user'] = $user['username'];
                 $_SESSION['user_id'] = $user['id'];
-                $_SESSION['is_admin'] = !empty($user['is_admin']); // <--- ADD THIS
+                $_SESSION['is_admin'] = !empty($user['is_admin']); 
 
                 // Merge session cart (if exists) into DB cart
                 if (!empty($_SESSION['cart'])) {
@@ -115,7 +115,7 @@ class AuthController
      */
     public function logout()
     {
-        unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['is_admin']); // <-- updated here
+        unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['is_admin']); 
         unset($_SESSION['cart']);
         $_SESSION['toast'] = [
             'message' => 'Logged out successfully.',

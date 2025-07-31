@@ -20,12 +20,12 @@ class AdminProductController
 
         $showDeleted = !empty($_GET['show_deleted']);
         $products = Product::all($showDeleted);
-        $categories = Product::categories(); // Fetch all categories for forms
+        $categories = Product::categories(); 
         $error = $_GET['error'] ?? '';
         $success = $_GET['success'] ?? '';
         View::render('admin/products', [
             'products' => $products,
-            'categories' => $categories, // <-- add this for form dropdown
+            'categories' => $categories, 
             'error' => $error,
             'success' => $success,
             'showDeleted' => $showDeleted
@@ -107,7 +107,7 @@ class AdminProductController
         $success = $_GET['success'] ?? '';
         View::render('admin/edit_product', [
             'product' => $product,
-            'categories' => $categories, // <-- add this for category dropdown
+            'categories' => $categories, 
             'error' => $error,
             'success' => $success
         ]);

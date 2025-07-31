@@ -155,8 +155,4 @@ For a production app, use a robust framework and follow industry best practices 
 👨‍🌾 Author
 John Rollins
 
-GitHub: JohnR789
-
-LinkedIn
-
 Built with care, PHP, caffeine, and a love of gardening tools! 🌷

@@ -2,7 +2,7 @@
 INSERT INTO users (name, email, username, password, is_admin)
 VALUES
 ('John Rollins', 'johnrollins789@gmail.com', 'johnr789', '$2y$10$Aqp2lMEfKQgI7zM0hXZ/OuVqp4LzYxOjQ6WYoF6n6.Ty4CuZySdVm', TRUE); 
--- NOTE: This hash is for "testpassword" (change if you want).
+-- NOTE: This hash is for "testpassword".
 
 -- CATEGORIES
 INSERT INTO categories (name) VALUES

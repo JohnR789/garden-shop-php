@@ -79,7 +79,7 @@ class Product {
 
     /**
      * Pagination: returns ['data' => [...], 'total' => n]
-     * Uses LIMIT/OFFSET directly (Postgres-safe).
+     * Uses LIMIT/OFFSET directly.
      */
     public static function paginated($withDeleted = false, $category_id = null, $sort = 'newest', $search = '', $page = 1, $perPage = 9) {
         $pdo = self::pdo();
@@ -98,7 +98,7 @@ class Product {
         }
         if ($conditions) $sql .= ' WHERE ' . implode(' AND ', $conditions);
         $sql .= ' ' . self::sortSql($sort);
-        // Use integer casting for LIMIT/OFFSET, not parameters (prevents SQL syntax error)
+        // Use integer casting for LIMIT/OFFSET, not parameters 
         $offset = max(0, ((int)$page - 1) * (int)$perPage);
         $limit = (int)$perPage;
         $sql .= " LIMIT $limit OFFSET $offset";
@@ -107,7 +107,7 @@ class Product {
         $stmt->execute($params);
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Corrected count query to use prepare/execute when there are conditions with params!
+        // Count query to use prepare/execute when there are conditions with params
         if ($conditions) {
             $totalSql = 'SELECT COUNT(*) FROM products WHERE ' . implode(' AND ', $conditions);
             $totalStmt = $pdo->prepare($totalSql);

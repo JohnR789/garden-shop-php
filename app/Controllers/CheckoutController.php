@@ -30,7 +30,7 @@ class CheckoutController {
             foreach ($items as $item) {
                 $item['qty'] = $item['quantity'];
                 $item['subtotal'] = $item['qty'] * $item['price'];
-                $item['id'] = $item['product_id']; // Standardize for Order model!
+                $item['id'] = $item['product_id']; 
                 $products[] = $item;
                 $total += $item['subtotal'];
             }
